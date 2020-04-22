@@ -98,7 +98,7 @@ function UpdateFileName(fileName, extension) {
 
 // GetFileBody retrieves the file content as a string
 function GetFileBody(file) {
-	return fs.readFileSync(InputDir + '/' + file).toString('utf-8');
+	return fs.readFileSync(InputDir + file).toString('utf-8');
 }
 
 // ConvertImageRoutes this function changed all instances of the ImageImport path to localhost,
