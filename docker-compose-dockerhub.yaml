@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  makepdfs:
+  convert:
     container_name: markdown-to-pdf
     build:
       context: .
