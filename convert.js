@@ -32,15 +32,15 @@ const html_template = (process.env.INPUT_TEMPLATE === undefined) ? "template/tem
 const app = express();
 
 // Append Docker workspace structure to directories
-const InputDir = './github/workspace/' + input_dir;
-const OutputDir = './github/workspace/' + output_dir;
-const ImageDir = './github/workspace/' + images_dir;
+const InputDir = '/github/workspace/' + input_dir;
+const OutputDir = '/github/workspace/' + output_dir;
+const ImageDir = '/github/workspace/' + images_dir;
 const ImageImport = image_import;
 
-const ThemeFile = './github/workspace/' + theme;
-const HighlightThemeFile = './github/workspace/' + highlight_theme;
+const ThemeFile = '/github/workspace/' + theme;
+const HighlightThemeFile = '/github/workspace/' + highlight_theme;
 
-const TemplateFile = './github/workspace/' + html_template;
+const TemplateFile = '/github/workspace/' + html_template;
 
 // Assign the style and template files to strings for later manipulation
 const style =
