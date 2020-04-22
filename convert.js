@@ -24,9 +24,9 @@ const output_dir = (process.env.INPUT_OUTPUT_DIR == undefined || process.env.INP
 const build_html = (process.env.INPUT_BUILD_HTML == undefined || process.env.INPUT_BUILD_HTML == "" ) ? true : process.env.INPUT_BUILD_HTML === "true";
 
 // Custom CSS and HTML files for theming
-const theme = (process.env.INPUT_THEME == undefined || process.env.INPUT_THEME == "" ) ? "styles/markdown.css" : process.env.INPUT_THEME;
-const highlight_theme = (process.env.INPUT_HIGHLIGHT_THEME == undefined || process.env.INPUT_HIGHLIGHT_THEME == "" ) ? "styles/highlight.css" : process.env.INPUT_HIGHLIGHT_THEME;
-const html_template = (process.env.INPUT_TEMPLATE == undefined || process.env.INPUT_TEMPLATE == "" ) ? "template/template.html" : process.env.INPUT_TEMPLATE;
+const ThemeFile = (process.env.INPUT_THEME == undefined || process.env.INPUT_THEME == "" ) ? "/styles/markdown.css" : '/github/workspace/' + process.env.INPUT_THEME;
+const HighlightThemeFile = (process.env.INPUT_HIGHLIGHT_THEME == undefined || process.env.INPUT_HIGHLIGHT_THEME == "" ) ? "/styles/highlight.css" : '/github/workspace/' + process.env.INPUT_HIGHLIGHT_THEME;
+const TemplateFile = (process.env.INPUT_TEMPLATE == undefined || process.env.INPUT_TEMPLATE == "" ) ? "/template/template.html" : '/github/workspace/' + process.env.INPUT_TEMPLATE;
 
 // Assign express instance for image server
 const app = express();
@@ -35,11 +35,6 @@ const app = express();
 const InputDir = '/github/workspace/' + input_dir + "/";
 const OutputDir = '/github/workspace/' + output_dir + "/";
 const ImageDir = '/github/workspace/' + images_dir + "/";
-
-const ThemeFile = '/github/workspace/' + theme;
-const HighlightThemeFile = '/github/workspace/' + highlight_theme;
-
-const TemplateFile = '/github/workspace/' + html_template;
 
 const ImageImport = image_import;
 
