@@ -13,33 +13,33 @@ const markdownIt = require('markdown-it');
 const request = require('request').defaults({ encoding: null });
 
 // GitHub Action inputs that are for this program to run
-const images_dir = (process.env.INPUT_IMAGES_DIR === undefined) ? "" : process.env.INPUT_IMAGES_DIR;
-const input_dir = (process.env.INPUT_INPUT_DIR === undefined) ? "" : process.env.INPUT_INPUT_DIR;
-const image_import = (process.env.INPUT_IMAGE_IMPORT === undefined) ? "" : process.env.INPUT_IMAGE_IMPORT;
+const images_dir = (process.env.INPUT_IMAGES_DIR == undefined ) ? "" : process.env.INPUT_IMAGES_DIR;
+const input_dir = (process.env.INPUT_INPUT_DIR == undefined) ? "" : process.env.INPUT_INPUT_DIR;
+const image_import = (process.env.INPUT_IMAGE_IMPORT == undefined) ? "" : process.env.INPUT_IMAGE_IMPORT;
 
 // Optional input, though recommended
-const output_dir = (process.env.INPUT_OUTPUT_DIR === undefined) ? "built" : process.env.INPUT_OUTPUT_DIR;
+const output_dir = (process.env.INPUT_OUTPUT_DIR == undefined) ? "built" : process.env.INPUT_OUTPUT_DIR;
 
 // Whether to also output a <filename>.html file, there is a bit of magic at the end to ensure that the value is a boolean
-const build_html = (process.env.INPUT_BUILD_HTML === undefined) ? true : process.env.INPUT_BUILD_HTML === "true";
+const build_html = (process.env.INPUT_BUILD_HTML == undefined) ? true : process.env.INPUT_BUILD_HTML === "true";
 
 // Custom CSS and HTML files for theming
-const theme = (process.env.INPUT_THEME === undefined) ? "styles/markdown.css" : process.env.INPUT_THEME;
-const highlight_theme = (process.env.INPUT_HIGHLIGHT_THEME === undefined) ? "styles/highlight.css" : process.env.INPUT_HIGHLIGHT_THEME;
-const html_template = (process.env.INPUT_TEMPLATE === undefined) ? "template/template.html" : process.env.INPUT_TEMPLATE;
+const theme = (process.env.INPUT_THEME == undefined) ? "styles/markdown.css" : process.env.INPUT_THEME;
+const highlight_theme = (process.env.INPUT_HIGHLIGHT_THEME == undefined) ? "styles/highlight.css" : process.env.INPUT_HIGHLIGHT_THEME;
+const html_template = (process.env.INPUT_TEMPLATE == undefined) ? "template/template.html" : process.env.INPUT_TEMPLATE;
 
 // Assign express instance for image server
 const app = express();
 
 // Append Docker workspace structure to directories
-const InputDir = '/github/workspace/' + input_dir + "/";
-const OutputDir = '/github/workspace/' + output_dir + "/";
-const ImageDir = '/github/workspace/' + images_dir + "/";
+const InputDir = './github/workspace/' + input_dir + "/";
+const OutputDir = './github/workspace/' + output_dir + "/";
+const ImageDir = './github/workspace/' + images_dir + "/";
 
-const ThemeFile = '/github/workspace/' + theme;
-const HighlightThemeFile = '/github/workspace/' + highlight_theme;
+const ThemeFile = './github/workspace/' + theme;
+const HighlightThemeFile = './github/workspace/' + highlight_theme;
 
-const TemplateFile = '/github/workspace/' + html_template;
+const TemplateFile = './github/workspace/' + html_template;
 
 const ImageImport = image_import;
 
