@@ -15,7 +15,7 @@ const request = require('request').defaults({ encoding: null });
 // GitHub Action inputs that are for this program to run
 const images_dir = (process.env.INPUT_IMAGES_DIR == undefined || process.env.INPUT_IMAGES_DIR == "" ) ? "" : process.env.INPUT_IMAGES_DIR;
 const input_dir = (process.env.INPUT_INPUT_DIR == undefined || process.env.INPUT_INPUT_DIR == "" ) ? "" : process.env.INPUT_INPUT_DIR;
-const image_import = (process.env.INPUT_IMAGE_IMPORT == undefined || process.env.INPUT_IMAGE_IMPORT == "" ) ? "" : process.env.INPUT_IMAGE_IMPORT;
+const image_import = (process.env.INPUT_IMAGE_IMPORT == undefined || process.env.INPUT_IMAGE_IMPORT == "" ) ? null : process.env.INPUT_IMAGE_IMPORT;
 
 // Optional input, though recommended
 const output_dir = (process.env.INPUT_OUTPUT_DIR == undefined || process.env.INPUT_OUTPUT_DIR == "" ) ? "built" : process.env.INPUT_OUTPUT_DIR;
@@ -100,6 +100,7 @@ function GetFileBody(file) {
 // it then fetches this URL and encodes it to base64 so we can include it in both the HTML and
 // PDF files without having to lug around an images folder
 function ConvertImageRoutes(html) {
+	if (ImageImport === null){return html;}
 	let imagePath = ImageImport.replace(/[-[\]{}()*+?.,\\^$|#\\]/g, '\\$&');
 	html = html.replace(new RegExp(imagePath, "g"), "http://localhost:3000")
 	let rex = /<img[^>]+src="([^">]+)"/g;
