@@ -39,7 +39,6 @@ const ImageDir = '/github/workspace/' + images_dir + "/";
 const ImageImport = image_import;
 
 console.log(`Env 1: "${process.env.INPUT_HIGHLIGHT_THEME}"`);
-console.log(`Env 2: "${highlight_theme}"`);
 console.log(`Env 3: "${HighlightThemeFile}"`);
 
 // Assign the style and template files to strings for later manipulation
