@@ -105,7 +105,7 @@ function ConvertImageRoutes(html) {
 	let rex = /<img[^>]+src="([^">]+)"/g;
 	let m
 	while (m = rex.exec(html)) {
-		encodeImage(m[1], async function (url, response) {
+		encodeImage(m[1], function (url, response) {
 			html = html.replace(new RegExp(url, "g"), response);
 		})
 	}
