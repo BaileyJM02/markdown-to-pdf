@@ -1,0 +1,18 @@
+{
+  "name" : "markdown-to-pdf",
+  "version" : "1.0.0",
+  "description" : "Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.",
+  "repository" : {"type": "git", "url": "git://github.com/baileyjm02/markdown-to-pdf.git"},
+  "main" : "convert.js",
+  "dependencies": {
+    "cheerio": "1.0.0-rc.3",
+    "commander": "2.20.0",
+    "express": "4.17.1",
+    "highlight.js": "^10.0.0",
+    "markdown-it": "8.4.2",
+    "markdown-it-named-headers": "0.0.4",
+    "mustache": "4.0.1",
+    "puppeteer": "1.15.0",
+    "request": "^2.88.2"
+  }
+}

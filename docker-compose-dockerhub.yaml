@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  makepdfs:
+    container_name: markdown-to-pdf
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "baileyjm02/markdown-to-pdf:${TAG:-latest}"
