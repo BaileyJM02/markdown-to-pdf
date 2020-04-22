@@ -18,11 +18,9 @@ inputs:
   output_dir:
     description: '(Path) The location of the folder you want to place the built files'
     required: false
-    default: 'built/'
   build_html:
     description: '(Boolean) Whether to also create a .html file'
     required: false
-    default: 'true'
   theme:
     description: '(File) The location of the CSS file you want to use as the theme'
     required: false
