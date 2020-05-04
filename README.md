@@ -121,7 +121,10 @@ An example of a workflow for some documentation.
 
 name: Docs to PDF
 # This workflow is triggered on pushes to the repository.
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   converttopdf:
@@ -130,10 +133,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: baileyjm02/markdown-to-pdf@master
-        # Only continue past here when pushed to master
-        if: github.ref == 'refs/heads/master'
         with:
-          markdown_dir: docs
+          input_dir: docs
           output_dir: pdfs
           images_dir: docs/images
           # for example <img src="./images/file-name.png">
@@ -144,7 +145,7 @@ jobs:
         with:
           name: docs
           path: pdfs
-          ```
+
 ````
 
 ## Contributions
