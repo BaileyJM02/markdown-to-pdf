@@ -8,16 +8,16 @@ RUN apt-get update && \
     libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget curl && \
     rm -rf /var/lib/apt/lists/*
 
-COPY convert.js /
+COPY markdown-to-pdf.js /
 COPY package.json /
 COPY template/ template/
 COPY styles/ styles/
 
 RUN npm install
 RUN fc-cache -fv && \
-    chmod +x /convert.js && \
+    chmod +x /markdown-to-pdf.js && \
     mkdir /pdf && \
     chmod 777 /pdf && \
-    ln -s /convert.js /usr/local/bin/convert
+    ln -s /markdown-to-pdf.js /usr/local/bin/markdown-to-pdf
 
-CMD [ "convert" ]
+CMD [ "markdown-to-pdf" ]
