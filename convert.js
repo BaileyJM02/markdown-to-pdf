@@ -9,24 +9,25 @@ const express = require('express');
 const mustache = require('mustache');
 const puppeteer = require('puppeteer');
 const markdownIt = require('markdown-it');
+const { response } = require('express');
 // Encoding is "null" so we can get the image correctly
 const request = require('request').defaults({ encoding: null });
 
 // GitHub Action inputs that are for this program to run
-const images_dir = (process.env.INPUT_IMAGES_DIR == undefined || process.env.INPUT_IMAGES_DIR == "" ) ? "" : process.env.INPUT_IMAGES_DIR;
-const input_dir = (process.env.INPUT_INPUT_DIR == undefined || process.env.INPUT_INPUT_DIR == "" ) ? "" : process.env.INPUT_INPUT_DIR;
-const image_import = (process.env.INPUT_IMAGE_IMPORT == undefined || process.env.INPUT_IMAGE_IMPORT == "" ) ? null : process.env.INPUT_IMAGE_IMPORT;
+const images_dir = (process.env.INPUT_IMAGES_DIR == undefined || process.env.INPUT_IMAGES_DIR == "") ? "" : process.env.INPUT_IMAGES_DIR;
+const input_dir = (process.env.INPUT_INPUT_DIR == undefined || process.env.INPUT_INPUT_DIR == "") ? "" : process.env.INPUT_INPUT_DIR;
+const image_import = (process.env.INPUT_IMAGE_IMPORT == undefined || process.env.INPUT_IMAGE_IMPORT == "") ? null : process.env.INPUT_IMAGE_IMPORT;
 
 // Optional input, though recommended
-const output_dir = (process.env.INPUT_OUTPUT_DIR == undefined || process.env.INPUT_OUTPUT_DIR == "" ) ? "built" : process.env.INPUT_OUTPUT_DIR;
+const output_dir = (process.env.INPUT_OUTPUT_DIR == undefined || process.env.INPUT_OUTPUT_DIR == "") ? "built" : process.env.INPUT_OUTPUT_DIR;
 
 // Whether to also output a <filename>.html file, there is a bit of magic at the end to ensure that the value is a boolean
-const build_html = (process.env.INPUT_BUILD_HTML == undefined || process.env.INPUT_BUILD_HTML == "" ) ? true : process.env.INPUT_BUILD_HTML === "true";
+const build_html = (process.env.INPUT_BUILD_HTML == undefined || process.env.INPUT_BUILD_HTML == "") ? true : process.env.INPUT_BUILD_HTML === "true";
 
 // Custom CSS and HTML files for theming
-const ThemeFile = (process.env.INPUT_THEME == undefined || process.env.INPUT_THEME == "" ) ? "/styles/markdown.css" : '/github/workspace/' + process.env.INPUT_THEME;
-const HighlightThemeFile = (process.env.INPUT_HIGHLIGHT_THEME == undefined || process.env.INPUT_HIGHLIGHT_THEME == "" ) ? "/styles/highlight.css" : '/github/workspace/' + process.env.INPUT_HIGHLIGHT_THEME;
-const TemplateFile = (process.env.INPUT_TEMPLATE == undefined || process.env.INPUT_TEMPLATE == "" ) ? "/template/template.html" : '/github/workspace/' + process.env.INPUT_TEMPLATE;
+const ThemeFile = (process.env.INPUT_THEME == undefined || process.env.INPUT_THEME == "") ? "/styles/markdown.css" : '/github/workspace/' + process.env.INPUT_THEME;
+const HighlightThemeFile = (process.env.INPUT_HIGHLIGHT_THEME == undefined || process.env.INPUT_HIGHLIGHT_THEME == "") ? "/styles/highlight.css" : '/github/workspace/' + process.env.INPUT_HIGHLIGHT_THEME;
+const TemplateFile = (process.env.INPUT_TEMPLATE == undefined || process.env.INPUT_TEMPLATE == "") ? "/template/template.html" : '/github/workspace/' + process.env.INPUT_TEMPLATE;
 
 // Assign express instance for image server
 const app = express();
@@ -35,7 +36,6 @@ const app = express();
 const InputDir = '/github/workspace/' + input_dir + "/";
 const OutputDir = '/github/workspace/' + output_dir + "/";
 const ImageDir = '/github/workspace/' + images_dir + "/";
-
 const ImageImport = image_import;
 
 // Assign the style and template files to strings for later manipulation
@@ -99,18 +99,23 @@ function GetFileBody(file) {
 // ConvertImageRoutes this function changed all instances of the ImageImport path to localhost,
 // it then fetches this URL and encodes it to base64 so we can include it in both the HTML and
 // PDF files without having to lug around an images folder
-function ConvertImageRoutes(html) {
-	if (ImageImport === null){return html;}
+async function ConvertImageRoutes(html) {
+	if (ImageImport === null) { return html; }
 	let imagePath = ImageImport.replace(/[-[\]{}()*+?.,\\^$|#\\]/g, '\\$&');
-	html = html.replace(new RegExp(imagePath, "g"), "http://localhost:3000")
+	let newPaths = html.replace(new RegExp(imagePath, "g"), "http://localhost:3000")
 	let rex = /<img[^>]+src="([^">]+)"/g;
 	let m
-	while (m = rex.exec(html)) {
-		encodeImage(m[1], function (url, response) {
-			html = html.replace(new RegExp(url, "g"), response);
-		})
+	let encoded
+	while (m = rex.exec(newPaths)) {
+		try {
+			let image = await encodeImage(m[1]);
+			newPaths = newPaths.replace(new RegExp(m[1], "g"), image);
+		} catch (error) {
+			console.log('ERROR:', error);
+		}
+		encoded = newPaths
 	}
-	return html;
+	return encoded;
 }
 
 // This converts the markdown string to it's HTML values # => h1 etc.
@@ -160,12 +165,21 @@ function BuildPDF(data, file) {
 }
 
 // encodeImage is a helper function to fetch a URL and return the image as a base64 string
-function encodeImage(url, callback) {
-	request.get(url, function (error, response, body) {
-		if (error && response.statusCode != 200) { return }
-		let data = "data:" + response.headers["content-type"] + ";base64," + new Buffer.from(body).toString('base64');
-		return callback(url, data);
-	})
+async function encodeImage(url) {
+	return new Promise((resolve, reject) => {
+		request.get(url, function (error, response, body) {
+			if (error) {
+				console.log(error);
+				return resolve(null);
+			}
+			if (response.statusCode != 200) {
+				console.log("Images not found, is the image folder route correct?");
+				return resolve(null);
+			}
+			let data = "data:" + response.headers["content-type"].replace(" ", "") + ";base64," + new Buffer.from(body).toString('base64');
+			return resolve(data);
+		})
+	});
 }
 
 // Slug is a helper function to escape characters in the titles URL
@@ -193,37 +207,38 @@ function CreateOutputDirectory(dirname) {
 }
 
 // Start is a wrapper function to call the readdir folder
-function Start() {
-	fs.readdir(InputDir, function (err, files) {
+async function Start() {
+	await fs.readdir(InputDir, async function (err, files) {
 		// Check output folder exists and fetch file array
-		CreateOutputDirectory(OutputDir);
-		files = GetMarkdownFiles(files);
+		await CreateOutputDirectory(OutputDir);
+		files = await GetMarkdownFiles(files);
 
-		console.log('Markdown files found: ' + files.join(', '));
+		if (files.length == 0) {
+			console.log('No markdown files found. Exiting.');
+			return process.exit(0);
+		} else {
+			console.log('Markdown files found: ' + files.join(', '));
+		}
 
 		// Loop through each file converting it
 		for (let file of files) {
 
 			// Get the HTML from the MD file
-			let text = GetFileBody(file)
-			let preHTML = ConvertToHtml(text);
-			let html = ConvertImageRoutes(preHTML);
+			let text = await GetFileBody(file)
+			let preHTML = await ConvertToHtml(text);
+			let html = await ConvertImageRoutes(preHTML);
 
 			// If the `build_html` environment variable is true, build the HTML
 			if (build_html == true) {
-				BuildHTML(html, file);
+				await BuildHTML(html, file);
 			}
 
 			// Build the PDF file
-			BuildPDF(html, file);
+			await BuildPDF(html, file);
 
-			// If the loop has reached the final stage, prepare to shut down the image server so the process
-			// can end. We wait 5 seconds to ensure the last action has completed.
-			// TODO: Improve async functions so this can run once the last process has finished.
+			// If the loop has reached the final stage, shut down the image server
 			if (file == files.slice(-1)[0]) {
-				setTimeout(function () {
-					server.close(function () { console.log('Gracefully shutting down image server.'); });
-				}, 5000);
+				server.close(function () { console.log('Gracefully shut down image server.'); });
 			}
 		}
 	});
