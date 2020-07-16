@@ -136,9 +136,8 @@ jobs:
         with:
           input_dir: docs
           output_dir: pdfs
+          # for example <img src="./images/file-name.png">          
           images_dir: docs/images
-          # for example <img src="./images/file-name.png">
-          images_path: ./images
           # Default is true, can set to false to only get PDF files
           build_html: false
       - uses: actions/upload-artifact@v1
