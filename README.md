@@ -125,6 +125,9 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'docs/**.md'
+      - 'docs/images/**'
 
 jobs:
   converttopdf:
