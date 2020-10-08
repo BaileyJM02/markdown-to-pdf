@@ -125,6 +125,10 @@ on:
   push:
     branches:
       - master
+    # Paths can be used to only trigger actions when you have edited certain files, such as a file within the /docs directory
+    paths:
+      - 'docs/**.md'
+      - 'docs/images/**'
 
 jobs:
   converttopdf:
