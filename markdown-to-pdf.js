@@ -109,13 +109,13 @@ async function ConvertImageRoutes(html) {
 	while (m = rex.exec(newPaths)) {
 		try {
 			let image = await encodeImage(m[1]);
-			newPaths = newPaths.replace(new RegExp(m[1], "g"), image);
+			if (image != null) { newPaths = newPaths.replace(new RegExp(m[1], "g"), image); }
 		} catch (error) {
 			console.log('ERROR:', error);
 		}
 		encoded = newPaths
 	}
-	return encoded;
+	return (encoded == null) ? newPaths : encoded;
 }
 
 // This converts the markdown string to it's HTML values # => h1 etc.
