@@ -156,7 +156,7 @@ function BuildPDF(data, file) {
 			]
 		})
 		const page = await browser.newPage();
-		await page.goto(`data:text/html;,${encodeURIComponent(data)}`, { waitUntil: 'networkidle0', timeout: 50000 });
+		await page.goto(`data:text/html;,${encodeURIComponent(data)}`, { waitUntil: 'networkidle0', timeout: 250000 });
 		await page.pdf(PDFLayout);
 		await browser.close();
 	})();
