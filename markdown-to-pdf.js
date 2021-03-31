@@ -13,7 +13,7 @@ const { response } = require('express');
 // Encoding is "null" so we can get the image correctly
 const request = require('request').defaults({ encoding: null });
 
-// GitHub Action inputs that are for this program to run
+// GitHub Action inputs that are needed for this program to run
 const images_dir = (process.env.INPUT_IMAGES_DIR == undefined || process.env.INPUT_IMAGES_DIR == "") ? "" : process.env.INPUT_IMAGES_DIR;
 const input_dir = (process.env.INPUT_INPUT_DIR == undefined || process.env.INPUT_INPUT_DIR == "") ? "" : process.env.INPUT_INPUT_DIR;
 const image_import = (process.env.INPUT_IMAGE_IMPORT == undefined || process.env.INPUT_IMAGE_IMPORT == "") ? null : process.env.INPUT_IMAGE_IMPORT;
@@ -47,6 +47,8 @@ const template = fs.readFileSync(TemplateFile).toString('utf-8');
 // Start image server so we can encode images correctly
 app.use(express.static(ImageDir))
 let server = app.listen(3000);
+
+console.log("Started image server with image folder route '" + ImageDir + "'.");
 
 // GetMarkdownFiles returns an array of only files ending in .md or .markdown
 // NOTE: When a file name is the same, eg. happy.md and happy.markdown, only one file is
