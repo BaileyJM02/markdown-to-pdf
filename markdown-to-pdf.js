@@ -156,7 +156,7 @@ function BuildPDF(data, file) {
 			]
 		})
 		const page = await browser.newPage();
-		await page.goto(`data:text/html;,${encodeURIComponent(data)}`, { waitUntil: 'networkidle0', timeout: 250000 });
+		await page.goto(`data:text/html;,${encodeURIComponent(data)}`, { waitUntil: 'load', timeout: 5 * 60 * 1000 });
 		await page.pdf(PDFLayout);
 		await browser.close();
 	})();
@@ -173,7 +173,7 @@ async function encodeImage(url) {
 				return resolve(null);
 			}
 			if (response.statusCode != 200) {
-				console.log("Images not found, is the image folder route correct?");
+				console.log("Image not found, is the image folder route correct? [" + url + "]");
 				return resolve(null);
 			}
 			let data = "data:" + response.headers["content-type"].replace(" ", "") + ";base64," + new Buffer.from(body).toString('base64');
