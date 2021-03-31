@@ -6,4 +6,4 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: "baileyjm02/markdown-to-pdf:${TAG:-latest}"
+    image: "twohorus/markdown-to-pdf:${TAG:-latest}"
