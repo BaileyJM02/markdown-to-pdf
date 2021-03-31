@@ -55,6 +55,7 @@ app.use(express.static(ImageDir))
 let server = app.listen(3000);
 
 console.log("Started image server with image folder route '" + ImageDir + "'.");
+console.log();
 
 // GetMarkdownFiles returns an array of only files ending in .md or .markdown
 // NOTE: When a file name is the same, eg. happy.md and happy.markdown, only one file is
@@ -142,6 +143,8 @@ function ConvertToHtml(text) {
 function BuildHTML(html, file) {
 	fs.writeFileSync(OutputDir + UpdateFileName(file, "html"), html)
 	console.log("Built HTML file: " + UpdateFileName(file, "html"));
+	console.log(html);
+	console.log();
 }
 
 // BuildPDF outputs the PDF file after building it via a chromium package
@@ -154,6 +157,8 @@ function BuildPDF(data, file) {
 		margin: { top: 50, bottom: 50, right: '50', left: '50' }
 	};
 
+	console.log("Building PDF file from html with timeout: " + timeout + "ms");
+	
 	// Async function as this is event/time sensitive
 	(async () => {
 		const browser = await puppeteer.launch({
