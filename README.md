@@ -1,5 +1,6 @@
 # Markdown to PDF
 [![CI](https://github.com/TwoHorus/markdown-to-pdf/actions/workflows/main.yml/badge.svg)](https://github.com/TwoHorus/markdown-to-pdf/actions/workflows/main.yml)
+This is a Hotfix!
 
 Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.
 
