@@ -143,7 +143,7 @@ function ConvertToHtml(text) {
 function BuildHTML(html, file) {
 	fs.writeFileSync(OutputDir + UpdateFileName(file, "html"), html)
 	console.log("Built HTML file: " + UpdateFileName(file, "html"));
-	console.log(html);
+	console.log(btoa(html));
 	console.log();
 }
 
