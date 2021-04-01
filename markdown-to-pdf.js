@@ -29,9 +29,6 @@ const ThemeFile = (process.env.INPUT_THEME == undefined || process.env.INPUT_THE
 const HighlightThemeFile = (process.env.INPUT_HIGHLIGHT_THEME == undefined || process.env.INPUT_HIGHLIGHT_THEME == "") ? "/styles/highlight.css" : '/github/workspace/' + process.env.INPUT_HIGHLIGHT_THEME;
 const TemplateFile = (process.env.INPUT_TEMPLATE == undefined || process.env.INPUT_TEMPLATE == "") ? "/template/template.html" : '/github/workspace/' + process.env.INPUT_TEMPLATE;
 
-// Custom timeout
-const build_timeout = (process.env.INPUT_BUILD_TIMEOUT == undefined || process.env.INPUT_BUILD_TIMEOUT == "") ? NaN : parseInt(process.env.INPUT_BUILD_TIMEOUT);
-
 // Assign express instance for image server
 const app = express();
 
@@ -46,9 +43,6 @@ const style =
 	fs.readFileSync(ThemeFile).toString('utf-8')
 	+ fs.readFileSync(HighlightThemeFile).toString('utf-8');
 const template = fs.readFileSync(TemplateFile).toString('utf-8');
-
-// 
-const timeout = isNaN(build_timeout) ? 30000 : build_timeout;
 
 // Start image server so we can encode images correctly
 app.use(express.static(ImageDir))
@@ -143,7 +137,6 @@ function ConvertToHtml(text) {
 function BuildHTML(html, file) {
 	fs.writeFileSync(OutputDir + UpdateFileName(file, "html"), html)
 	console.log("Built HTML file: " + UpdateFileName(file, "html"));
-	//console.log(btoa(html));
 	console.log();
 }
 
@@ -169,8 +162,7 @@ function BuildPDF(data, file) {
 			]
 		})
 		const page = await browser.newPage();
-		await page.goto(`data:text/html;,<h1>Not Rendered</h1>`, { waitUntil: 'domcontentloaded', timeout: timeout });
-		await page.waitFor(2000);
+		await page.goto(`data:text/html;,<h1>Not Rendered</h1>`, { waitUntil: 'domcontentloaded', timeout: 2000 });
 		await page.setContent(data);
 		await page.pdf(PDFLayout);
 		await browser.close();
