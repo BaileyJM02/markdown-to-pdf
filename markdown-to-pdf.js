@@ -122,10 +122,11 @@ async function ConvertImageRoutes(html) {
 }
 
 // This converts the markdown string to it's HTML values # => h1 etc.
-function ConvertToHtml(text) {
+function ConvertToHtml(text, file) {
 	let md = GetMarkdownIt();
 	let body = md.render(text);
 	let view = {
+		title: UpdateFileName(file, null),
 		style: style,
 		content: body
 	};
@@ -230,17 +231,19 @@ async function Start() {
 
 			// Get the HTML from the MD file
 			let text = await GetFileBody(file)
-			let preHTML = await ConvertToHtml(text);
+			let preHTML = await ConvertToHtml(text, file);
 			let html = await ConvertImageRoutes(preHTML);
 
 			// If the `build_html` environment variable is true, build the HTML
 			if (build_html == true) {
 				await BuildHTML(html, file);
 			}
-			console.log('Awaiting the Builder.');
+			
 			// Build the PDF file
+			console.log('Awaiting the PDF Builder.');
 			await BuildPDF(html, file);
 			console.log('BuildPDF function has returned successfully.');
+			
 			// If the loop has reached the final stage, shut down the image server
 			if (file == files.slice(-1)[0]) {
 				server.close(function () { console.log('Gracefully shut down image server.'); });
