@@ -169,7 +169,7 @@ function BuildPDF(data, file) {
 			]
 		})
 		const page = await browser.newPage();
-		await page.goto(`data:text/html;,${encodeURIComponent(data)}`, { waitUntil: 'networkidle0', timeout: timeout });
+		await page.goto(`data:text/html;,${encodeURIComponent(data)}`, { waitUntil: 'domcontentloaded', timeout: timeout });
 		await page.pdf(PDFLayout);
 		await browser.close();
 	})();
@@ -245,10 +245,10 @@ async function Start() {
 			if (build_html == true) {
 				await BuildHTML(html, file);
 			}
-
+			console.log('Awaiting the Builder.');
 			// Build the PDF file
 			await BuildPDF(html, file);
-
+			console.log('BuildPDF function has returned successfully.');
 			// If the loop has reached the final stage, shut down the image server
 			if (file == files.slice(-1)[0]) {
 				server.close(function () { console.log('Gracefully shut down image server.'); });
