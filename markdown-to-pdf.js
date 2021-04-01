@@ -169,7 +169,9 @@ function BuildPDF(data, file) {
 			]
 		})
 		const page = await browser.newPage();
-		await page.goto(`data:text/html;,${encodeURIComponent(data)}`, { waitUntil: 'domcontentloaded', timeout: timeout });
+		await page.goto(`data:text/html;,<h1>Not Rendered</h1>`, { waitUntil: 'domcontentloaded', timeout: timeout });
+		await page.waitFor(2000);
+		await page.setContent(data);
 		await page.pdf(PDFLayout);
 		await browser.close();
 	})();
