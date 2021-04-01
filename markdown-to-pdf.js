@@ -17,6 +17,7 @@ const DEFAULT_THEME_FILE = '/styles/markdown.css';
 
 function getRunnerInput(name, def, callback = val => val) {
 	let value = process.env['INPUT_' + name.toUpperCase()];
+	
 	return (value === undefined || value === '') ? def : callback(value);
 }
 
@@ -68,7 +69,7 @@ function GetMarkdownFiles(files) {
 		if(path.extname(filePath).match(/^(.md|.markdown)$/)) {
 			return true;
 		}
-	})
+	});
 }
 
 // GetMarkdownIt returns the instance of markdown-it with the correct settings
@@ -86,13 +87,13 @@ function GetMarkdownIt() {
 				}catch(__) {
 				}
 			}
+			
 			return ''; // use external default escaping
 		}
-	})
-	// Import headers to ensure that the IDs are escaped
-	md.use(require('markdown-it-named-headers'), {
-		slugify: Slug
 	});
+	
+	// Import headers to ensure that the IDs are escaped
+	md.use(require('markdown-it-named-headers'), {slugify: Slug});
 	
 	return md;
 }
@@ -104,7 +105,7 @@ function UpdateFileName(fileName, extension) {
 	
 	if(extension !== null) fileName.push(extension);
 	
-	return fileName.join(".");
+	return fileName.join('.');
 }
 
 // GetFileBody retrieves the file content as a string
@@ -119,20 +120,25 @@ async function ConvertImageRoutes(html) {
 	if(ImageImport === null) {
 		return html;
 	}
+	
 	let imagePath = ImageImport.replace(/[-\[\]{}()*+?.,\\^$|#]/g, '\\$&');
-	let newPaths = html.replace(new RegExp(imagePath, "g"), "http://localhost:3000")
+	let newPaths = html.replace(new RegExp(imagePath, 'g'), 'http://localhost:3000')
 	let rex = /<img[^>]+src="([^">]+)"/g;
-	let m
-	let encoded
+	let m;
+	let encoded;
+	
 	while(m = rex.exec(newPaths)) {
 		try {
 			let image = await encodeImage(m[1]);
-			newPaths = newPaths.replace(new RegExp(m[1], "g"), image);
+			
+			newPaths = newPaths.replace(new RegExp(m[1], 'g'), image);
 		}catch(error) {
 			console.log('ERROR:', error);
 		}
-		encoded = newPaths
+		
+		encoded = newPaths;
 	}
+	
 	return encoded;
 }
 
@@ -145,25 +151,27 @@ function ConvertToHtml(text, file) {
 		style: style,
 		content: body
 	};
+	
 	// Compile the template
 	return mustache.render(template, view);
 }
 
 // BuildHTML outputs the HTML string to a file
 function BuildHTML(html, file) {
-	fs.writeFileSync(OutputDir + UpdateFileName(file, "html"), html)
-	console.log("Built HTML file: " + UpdateFileName(file, "html"));
+	fs.writeFileSync(OutputDir + UpdateFileName(file, 'html'), html);
+	
+	console.log('Built HTML file: ' + UpdateFileName(file, 'html'));
 	console.log();
 }
 
 // BuildPDF outputs the PDF file after building it via a chromium package
 function BuildPDF(data, file) {
 	let PDFLayout = {
-		path: OutputDir + UpdateFileName(file, "pdf"),
+		path: OutputDir + UpdateFileName(file, 'pdf'),
 		format: 'A4',
 		scale: .9,
 		displayHeaderFooter: false,
-		margin: {top: 50, bottom: 50, right: '50', left: '50'}
+		margin: {top: 50, bottom: 50, right: 50, left: 50}
 	};
 	
 	// Async function as this is event/time sensitive
@@ -174,15 +182,16 @@ function BuildPDF(data, file) {
 				'--no-sandbox',
 				'--disable-setuid-sandbox'
 			]
-		})
+		});
+		
 		const page = await browser.newPage();
-		await page.goto(`data:text/html;,<h1>Not Rendered</h1>`, {waitUntil: 'domcontentloaded', timeout: 2000});
+		await page.goto('data:text/html;,<h1>Not Rendered</h1>', {waitUntil: 'domcontentloaded', timeout: 2000});
 		await page.setContent(data);
 		await page.pdf(PDFLayout);
 		await browser.close();
+		
+		console.log('Built PDF file: ' + UpdateFileName(file, 'pdf'));
 	})();
-	
-	console.log("Built PDF file: " + UpdateFileName(file, "pdf"));
 }
 
 // encodeImage is a helper function to fetch a URL and return the image as a base64 string
@@ -191,13 +200,18 @@ async function encodeImage(url) {
 		request.get(url, function(error, response, body) {
 			if(error) {
 				console.log(error);
+				
 				return resolve(null);
 			}
+			
 			if(response.statusCode !== 200) {
-				console.log("Image not found, is the image folder route correct? [" + url + "]");
+				console.log('Image not found, is the image folder route correct? [' + url + ']');
+				
 				return resolve(null);
 			}
-			let data = "data:" + response.headers["content-type"].replace(" ", "") + ";base64," + new Buffer.from(body).toString('base64');
+			
+			let data = 'data:' + response.headers['content-type'].replace(' ', '') + ';base64,' + new Buffer.from(body).toString('base64');
+			
 			return resolve(data);
 		})
 	});
@@ -211,12 +225,14 @@ function Slug(string, used_headers) {
 		.replace(/\s+/g, '-')
 		.replace(/^-+/, '')
 		.replace(/-+$/, ''));
+	
 	if(used_headers[slug]) {
 		used_headers[slug]++;
 		slug += '-' + used_headers[slug];
 	}else {
 		used_headers[slug] = 0;
 	}
+	
 	return slug;
 }
 
@@ -232,10 +248,12 @@ async function Start() {
 	await fs.readdir(InputDir, async function(err, files) {
 		// Check output folder exists and fetch file array
 		await CreateOutputDirectory(OutputDir);
+		
 		files = await GetMarkdownFiles(files);
 		
 		if(files.length === 0) {
 			console.log('No markdown files found. Exiting.');
+			
 			return process.exit(0);
 		}else {
 			console.log('Markdown files found: ' + files.join(', '));
@@ -243,9 +261,8 @@ async function Start() {
 		
 		// Loop through each file converting it
 		for(let file of files) {
-			
 			// Get the HTML from the MD file
-			let text = await GetFileBody(file)
+			let text = await GetFileBody(file);
 			let preHTML = await ConvertToHtml(text, file);
 			let html = await ConvertImageRoutes(preHTML);
 			
