@@ -30,9 +30,6 @@ inputs:
   template:
     description: '(File) The location of the HTML/Mustache file you want to use as the HTML template'
     required: false
-  build_timeout:
-    description: '(Number) The timeout that will be used to create the PDF file'
-    required: false
 
 branding:
   icon: 'book'
