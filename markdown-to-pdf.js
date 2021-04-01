@@ -149,8 +149,6 @@ function BuildPDF(data, file) {
 		displayHeaderFooter: false,
 		margin: { top: 50, bottom: 50, right: '50', left: '50' }
 	};
-
-	console.log("Building PDF file from html with timeout: " + timeout + "ms");
 	
 	// Async function as this is event/time sensitive
 	(async () => {
