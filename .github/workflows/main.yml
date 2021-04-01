@@ -5,6 +5,7 @@ name: CI
 jobs:
   build-docker-container:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
     - uses: actions/checkout@v1
     - name: Build the docker image
