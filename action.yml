@@ -24,6 +24,9 @@ inputs:
   theme:
     description: '(File) The location of the CSS file you want to use as the theme'
     required: false
+  extend_default_theme:
+    description: '(Boolean) Whether to extend your custom CSS file with the default theme'
+    required: false
   highlight_theme:
     description: '(File) The location of the CSS file you want to use as the code snipped highlight theme'
     required: false
