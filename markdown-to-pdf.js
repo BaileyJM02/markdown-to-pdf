@@ -131,7 +131,9 @@ async function ConvertImageRoutes(html) {
 		try {
 			let image = await encodeImage(m[1]);
 			
-			newPaths = newPaths.replace(new RegExp(m[1], 'g'), image);
+			if (image != null) {
+				newPaths = newPaths.replace(new RegExp(m[1], 'g'), image);
+			}
 		}catch(error) {
 			console.log('ERROR:', error);
 		}
@@ -139,7 +141,7 @@ async function ConvertImageRoutes(html) {
 		encoded = newPaths;
 	}
 	
-	return encoded;
+	return (encoded == null) ? newPaths : encoded;
 }
 
 // This converts the markdown string to it's HTML values # => h1 etc.
