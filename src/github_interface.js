@@ -113,7 +113,7 @@ let md = new md2pdf({
 	template: template,
 });
 md.start();
-await fs.readdir(InputDir, async function(err, files) {
+fs.readdir(InputDir, async function(err, files) {
 	// Check output folder exists and fetch file array
 	CreateOutputDirectory(OutputDir);
 	
