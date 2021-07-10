@@ -1,4 +1,5 @@
 # Markdown to PDF
+
 [![CI](https://github.com/TwoHorus/markdown-to-pdf/actions/workflows/main.yml/badge.svg)](https://github.com/TwoHorus/markdown-to-pdf/actions/workflows/main.yml)
 This is a Hotfix!
 
@@ -17,7 +18,7 @@ Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.
 
 ```yaml
 with:
-    input_dir: value
+  input_dir: value
 ```
 
 (**Required**)
@@ -28,17 +29,18 @@ The location of the folder containing your .md or .markdown files.
 
 ```yaml
 with:
-    images_dir: value
+  images_dir: value
 ```
 
 ([Path](#path))
-The location of the folder containing your images, this should be the route of all images. So of you had images located at `images/about/file.png` and `images/something-else/file.png` you would pass the value `images`.
+The location of the folder containing your images, this should be the route of all images. So of you had images located
+at `images/about/file.png` and `images/something-else/file.png` you would pass the value `images`.
 
 ### Output Directory
 
 ```yaml
 with:
-    output_dir: value
+  output_dir: value
 ```
 
 ([Path](#path))
@@ -48,17 +50,19 @@ The location of the folder you want to place the built files.
 
 ```yaml
 with:
-    image_import: value
+  image_import: value
 ```
 
 ([String](#string))
-The path you use to import your images that can be replaced with the server URL. For example if you had `<img src="./images/something-else/file.">` you would pass `./images` as this is replaced by `https://localhost:3000` during the build process.
+The path you use to import your images that can be replaced with the server URL. For example if you
+had `<img src="./images/something-else/file.">` you would pass `./images` as this is replaced
+by `https://localhost:3000` during the build process.
 
 ### Build HTML
 
 ```yaml
 with:
-    build_html: value
+  build_html: value
 ```
 
 ([Boolean](#boolean))
@@ -68,17 +72,25 @@ Whether to also create a .html file.
 
 ```yaml
 with:
-    theme: value
+  theme: value
 ```
 
 ([File](#file))
 The location of the CSS file you want to use as the theme.
 
+```yaml
+with:
+  extend_default_theme: value
+```
+
+([Boolean](#boolean))
+Whether to extend your custom CSS file with the default theme
+
 ### Highlight CSS Theme
 
 ```yaml
 with:
-    highlight_theme: value
+  highlight_theme: value
 ```
 
 ([File](#file))
@@ -88,7 +100,7 @@ The location of the CSS file you want to use as the code snipped highlight theme
 
 ```yaml
 with:
-    template: value
+  template: value
 ```
 
 ([File](#file))
@@ -100,7 +112,8 @@ A few pieces to describe what input each value expects.
 
 ### Path
 
-A path will most likely be from your repository's route, it should not be prefixed or suffixed with a `/`. The path should look like so `docs/topic/featureDocs` or `writing/category`.
+A path will most likely be from your repository's route, it should not be prefixed or suffixed with a `/`. The path
+should look like so `docs/topic/featureDocs` or `writing/category`.
 
 ### String
 
@@ -156,4 +169,5 @@ jobs:
 
 ## Contributions
 
-Any contributions are helpful, please make a pull-request. If you would like to discuses a new feature, please create an issue first.
+Any contributions are helpful, please make a pull-request. If you would like to discuses a new feature, please create an
+issue first.
