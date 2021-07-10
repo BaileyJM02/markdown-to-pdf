@@ -28,7 +28,7 @@ function getRunnerPath(file) {
 // GitHub Action inputs that are needed for this program to run
 const InputDir = getRunnerInput('input_dir', '', getRunnerPath);
 const ImageImport = getRunnerInput('image_import', null);
-const ImageDir = getRunnerInput('images_dir', InputDir + '/' + (ImageImport ?? ''), getRunnerPath);
+const ImageDir = getRunnerInput('images_dir', InputDir + '/' + md2pdf.nullCoalescing(ImageImport, ''), getRunnerPath);
 
 // Optional input, though recommended
 const OutputDir = getRunnerInput('output_dir', 'built', getRunnerPath);
