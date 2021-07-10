@@ -9,27 +9,32 @@ const express = require('express');
 const mustache = require('mustache');
 const puppeteer = require('puppeteer');
 const MarkdownIt = require('markdown-it');
-const {response} = require('express');
 const request = require('request').defaults({encoding: null}); // Encoding is "null" so we can get the image correctly
 
 
+const RUNNER_DIR = '/github/workspace/';
 const DEFAULT_THEME_FILE = '/styles/markdown.css';
 
-function getRunnerInput(name, def, callback = val => val) {
+
+function getRunnerInput(name, def, transformer = val => val) {
 	let value = process.env['INPUT_' + name.toUpperCase()];
 	
-	return (value === undefined || value === '') ? def : callback(value);
+	return (value === undefined || value === '') ? def : transformer(value);
 }
 
 function getRunnerPath(file) {
-	return '/github/workspace/' + file;
+	file = path.normalize(RUNNER_DIR + file);
+	
+	if(!file.startsWith(RUNNER_DIR)) throw `Cannot move outside of directory '${RUNNER_DIR}'`;
+	
+	return file;
 }
 
 
 // GitHub Action inputs that are needed for this program to run
-const ImageDir = getRunnerInput('images_dir', '', getRunnerPath);
 const InputDir = getRunnerInput('input_dir', '', getRunnerPath);
 const ImageImport = getRunnerInput('image_import', null);
+const ImageDir = getRunnerInput('images_dir', InputDir + '/' + ImageImport, getRunnerPath);
 
 // Optional input, though recommended
 const OutputDir = getRunnerInput('output_dir', 'built', getRunnerPath);
@@ -131,7 +136,7 @@ async function ConvertImageRoutes(html) {
 		try {
 			let image = await encodeImage(m[1]);
 			
-			if (image != null) {
+			if(image != null) {
 				newPaths = newPaths.replace(new RegExp(m[1], 'g'), image);
 			}
 		}catch(error) {
@@ -277,14 +282,12 @@ async function Start() {
 			console.log('Awaiting the PDF Builder.');
 			await BuildPDF(html, file);
 			console.log('BuildPDF function has returned successfully.');
-			
-			// If the loop has reached the final stage, shut down the image server
-			if(file === files.slice(-1)[0]) {
-				server.close(function() {
-					console.log('Gracefully shut down image server.');
-				});
-			}
 		}
+		
+		// Shutdown the image server
+		server.close(function() {
+			console.log('Gracefully shut down image server.');
+		});
 	});
 }
 
