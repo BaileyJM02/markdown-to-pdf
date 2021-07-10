@@ -1,0 +1,249 @@
+#!/usr/bin/env node
+'use strict';
+
+// Import everything we need
+const fs = require('fs');
+const hljs = require('highlight.js');
+const express = require('express');
+const mustache = require('mustache');
+const puppeteer = require('puppeteer');
+const MarkdownIt = require('markdown-it');
+const request = require('request').defaults({encoding: null}); // Encoding is "null" so we can get the image correctly
+
+
+function nullCoalescing(value, fallback) {
+	return value !== undefined && value !== null ? value : fallback;
+}
+
+function getFileContent(file, encoding = 'utf-8') {
+	return fs.readFileSync(file).toString(encoding);
+}
+
+// GetMarkdownIt returns the instance of markdown-it with the correct settings
+function GetMarkdownIt() {
+	let md = new MarkdownIt({
+		html: true,
+		breaks: true,
+		xhtmlOut: true,
+		// Handle code snippet highlighting, we can catch this error as it will
+		// be correctly handled by markdown-it
+		highlight: function(str, lang) {
+			if(lang && hljs.getLanguage(lang)) {
+				try {
+					return hljs.highlight(str, {language: lang}).value;
+				}catch(__) {
+				}
+			}
+			
+			return ''; // use external default escaping
+		}
+	});
+	
+	// Import headers to ensure that the IDs are escaped
+	//md.use(require('markdown-it-named-headers'), {slugify: Slug});
+	md.use(require('markdown-it-anchor'));
+	md.use(require('markdown-it-toc-done-right'));
+	
+	return md;
+}
+
+// encodeImage is a helper function to fetch a URL and return the image as a base64 string
+async function encodeImage(url) {
+	return new Promise((resolve, reject) => {
+		request.get(url, function(error, response, body) {
+			if(error) {
+				console.log(error);
+				
+				return resolve(null);
+			}
+			
+			if(response.statusCode !== 200) {
+				console.log('Image not found, is the image folder route correct? [' + url + ']');
+				
+				return resolve(null);
+			}
+			
+			let data = 'data:' + response.headers['content-type'].replace(' ', '') + ';base64,' + new Buffer.from(body).toString('base64');
+			
+			return resolve(data);
+		});
+	});
+}
+
+// Slug is a helper function to escape characters in the titles URL
+function Slug(string, used_headers) {
+	let slug = encodeURI(string.trim()
+		.toLowerCase()
+		.replace(/[\]\[!"#$%&'()*+,.\/:;<=>?@\\^_{|}~`]/g, '')
+		.replace(/\s+/g, '-')
+		.replace(/^-+/, '')
+		.replace(/-+$/, ''));
+	
+	if(used_headers[slug]) {
+		used_headers[slug]++;
+		slug += '-' + used_headers[slug];
+	}else {
+		used_headers[slug] = 0;
+	}
+	
+	return slug;
+}
+
+
+const PDFLayout = {
+	format: 'A4',
+	scale: .9,
+	displayHeaderFooter: false,
+	margin: {top: 50, bottom: 50, right: 50, left: 50}
+};
+
+const DEFAULT_OPTIONS = {
+	image_import: null,
+	image_dir: null,
+	
+	style: getFileContent('styles/markdown.css'),
+	template: getFileContent('template/template.html'),
+};
+
+function extendDefaultOptions(options = {}) {
+	if(options === DEFAULT_OPTIONS) return {...options};
+	
+	const result = {};
+	
+	for(let key in DEFAULT_OPTIONS) {
+		result[key] = nullCoalescing(options[key], DEFAULT_OPTIONS[key]);
+	}
+	
+	return result;
+}
+
+class MarkdownToPdf {
+	_image_import;
+	_image_dir;
+	_style;
+	_template;
+	
+	constructor(options = DEFAULT_OPTIONS) {
+		options = extendDefaultOptions(options);
+		
+		this._image_import = options.image_import;
+		this._image_dir = nullCoalescing(options.image_dir, this._image_import);
+		
+		this._style = options.style;
+		
+		this._template = options.template;
+	}
+	
+	start() {
+		this._image_server_app = express();
+		this._image_server_app.use(express.static(this._image_dir));
+		this._image_server = this._image_server_app.listen(3000);
+		
+		console.log("Started image server with image folder route '" + this._image_dir + "'.");
+		console.log();
+	}
+	
+	async convert(data, title) {
+		if(typeof data !== 'string') throw "Parameter 'data' has to be a string containing Markdown content";
+		if(typeof title !== 'string' && title !== undefined) throw "Parameter 'title' has to be a string";
+		
+		// Convert MD to HTML
+		let preHTML = this._convertToHtml(data, nullCoalescing(title, ''));
+		let html = await this._convertImageRoutes(preHTML);
+		
+		// Build the PDF file
+		const browser = await puppeteer.launch({
+			args: [
+				'--headless',
+				'--no-sandbox',
+				'--disable-setuid-sandbox'
+			]
+		});
+		
+		const page = await browser.newPage();
+		await page.goto('data:text/html;,<h1>Not Rendered</h1>', {waitUntil: 'domcontentloaded', timeout: 2000});
+		await page.setContent(html);
+		
+		let pdf = await page.pdf(PDFLayout);
+		
+		await browser.close();
+		
+		return new Result(html, pdf);
+	}
+	
+	close() {
+		// Shutdown the image server
+		this._image_server.close(function() {
+			console.log();
+			console.log('Gracefully shut down image server.');
+		});
+	}
+	
+	// This converts the markdown string to it's HTML values # => h1 etc.
+	_convertToHtml(text, title) {
+		let md = GetMarkdownIt();
+		let body = md.render(text);
+		let view = {
+			title: title,
+			style: this._style,
+			content: body
+		};
+		
+		// Compile the template
+		return mustache.render(this._template, view);
+	}
+	
+	// ConvertImageRoutes this function changed all instances of the ImageImport path to localhost,
+	// it then fetches this URL and encodes it to base64 so we can include it in both the HTML and
+	// PDF files without having to lug around an images folder
+	async _convertImageRoutes(html) {
+		if(this._image_import === null) {
+			return html;
+		}
+		
+		let imagePath = this._image_import.replace(/[-\[\]{}()*+?.,\\^$|#]/g, '\\$&');
+		let imagePathRegex = new RegExp(imagePath, 'g');
+		let imgTagRegex = /<img[^>]+src="([^">]+)"/g;
+		let encoded = html;
+		
+		let m;
+		while(m = imgTagRegex.exec(html)) {
+			try {
+				let path = m[1].replace(imagePathRegex, 'http://localhost:3000');
+				let image = await encodeImage(path);
+				
+				if(image !== null) {
+					encoded = encoded.replace(m[1], image);
+				}
+			}catch(error) {
+				console.log('ERROR:', error);
+			}
+		}
+		
+		return encoded;
+	}
+	
+	
+	static nullCoalescing = nullCoalescing;
+	static getFileContent = getFileContent;
+}
+
+class Result {
+	html;
+	pdf;
+	
+	constructor(html, pdf) {
+		this.html = html;
+		this.pdf = pdf;
+	}
+	
+	writeHTML(file) {
+		fs.writeFileSync(file, this.html);
+	}
+	
+	writePDF(file) {
+		fs.writeFileSync(file, this.pdf)
+	}
+}
+
+exports = module.exports = MarkdownToPdf;
