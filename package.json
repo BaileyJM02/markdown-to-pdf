@@ -17,7 +17,6 @@
 		"highlight.js": "^10.4.1",
 		"markdown-it": "12.1.0",
 		"markdown-it-anchor": "^8.1.0",
-		"markdown-it-named-headers": "0.0.4",
 		"markdown-it-toc-done-right": "^4.2.0",
 		"mustache": "4.0.1",
 		"puppeteer": "1.15.0",

@@ -39,8 +39,6 @@ function GetMarkdownIt() {
 		}
 	});
 	
-	// Import headers to ensure that the IDs are escaped
-	//md.use(require('markdown-it-named-headers'), {slugify: Slug});
 	md.use(require('markdown-it-anchor'));
 	md.use(require('markdown-it-toc-done-right'));
 	
