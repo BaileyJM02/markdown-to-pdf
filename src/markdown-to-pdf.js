@@ -95,35 +95,13 @@ const PDFLayout = {
 	margin: {top: 50, bottom: 50, right: 50, left: 50}
 };
 
-const DEFAULT_OPTIONS = {
-	image_import: null,
-	image_dir: null,
-	
-	style: getFileContent('styles/markdown.css'),
-	template: getFileContent('template/template.html'),
-};
-
-function extendDefaultOptions(options = {}) {
-	if(options === DEFAULT_OPTIONS) return {...options};
-	
-	const result = {};
-	
-	for(let key in DEFAULT_OPTIONS) {
-		result[key] = nullCoalescing(options[key], DEFAULT_OPTIONS[key]);
-	}
-	
-	return result;
-}
-
 class MarkdownToPdf {
 	_image_import;
 	_image_dir;
 	_style;
 	_template;
 	
-	constructor(options = DEFAULT_OPTIONS) {
-		options = extendDefaultOptions(options);
-		
+	constructor(options) {
 		this._image_import = options.image_import;
 		this._image_dir = nullCoalescing(options.image_dir, this._image_import);
 		
