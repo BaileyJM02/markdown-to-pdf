@@ -7,6 +7,8 @@ const md2pdf = require('./markdown-to-pdf');
 
 
 const DEFAULT_THEME_FILE = '/styles/markdown.css';
+const DEFAULT_HIGHLIGHT_FILE = '/styles/highlight.css';
+const DEFAULT_TEMPLATE_FILE = '/template/template.html';
 const RUNNER_DIR = '/github/workspace/';
 
 
@@ -38,8 +40,8 @@ const build_html = getRunnerInput('build_html', true, value => value === 'true')
 
 // Custom CSS and HTML files for theming
 const ThemeFile = getRunnerInput('theme', null, getRunnerPath);
-const HighlightThemeFile = getRunnerInput('highlight_theme', '/styles/highlight.css', getRunnerPath);
-const TemplateFile = getRunnerInput('template', '/template/template.html', getRunnerPath);
+const HighlightThemeFile = getRunnerInput('highlight_theme', DEFAULT_HIGHLIGHT_FILE, getRunnerPath);
+const TemplateFile = getRunnerInput('template', DEFAULT_TEMPLATE_FILE, getRunnerPath);
 
 // Whether to extend your custom CSS file with the default theme
 const extend_default_theme = getRunnerInput('extend_default_theme', false, value => value === 'true');

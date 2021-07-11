@@ -7,8 +7,10 @@ const hljs = require('highlight.js');
 const express = require('express');
 const mustache = require('mustache');
 const puppeteer = require('puppeteer');
-const MarkdownIt = require('markdown-it');
 const request = require('request').defaults({encoding: null}); // Encoding is "null" so we can get the image correctly
+const MarkdownIt = require('markdown-it');
+const MarkdownItAnchor = require('markdown-it-anchor');
+const markdownItTOC = require('markdown-it-toc-done-right');
 
 
 function nullCoalescing(value, fallback) {
@@ -39,8 +41,14 @@ function GetMarkdownIt() {
 		}
 	});
 	
-	md.use(require('markdown-it-anchor'));
-	md.use(require('markdown-it-toc-done-right'));
+	md.use(MarkdownItAnchor, {
+		permalink: MarkdownItAnchor.permalink.headerLink(),
+		slugify: slugify,
+	});
+	md.use(markdownItTOC, {
+		listType: 'ul',
+		slugify: slugify,
+	});
 	
 	return md;
 }
@@ -68,9 +76,11 @@ async function encodeImage(url) {
 	});
 }
 
-// Slug is a helper function to escape characters in the titles URL
-function Slug(string, used_headers) {
-	let slug = encodeURI(string.trim()
+const used_headers = {};
+
+// 'slugify' is a helper function to escape characters in the titles URL
+function slugify(string) {
+	let slug = encodeURIComponent(string.trim()
 		.toLowerCase()
 		.replace(/[\]\[!"#$%&'()*+,.\/:;<=>?@\\^_{|}~`]/g, '')
 		.replace(/\s+/g, '-')
@@ -78,8 +88,7 @@ function Slug(string, used_headers) {
 		.replace(/-+$/, ''));
 	
 	if(used_headers[slug]) {
-		used_headers[slug]++;
-		slug += '-' + used_headers[slug];
+		slug += '-' + ++used_headers[slug];
 	}else {
 		used_headers[slug] = 0;
 	}
