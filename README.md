@@ -106,6 +106,16 @@ with:
 ([File](#file))
 The location of the HTML/Mustache file you want to use as the HTML template.
 
+### Table Of Contents
+
+```yaml
+with:
+  table_of_contents: value
+```
+
+([Boolean](#boolean))
+Whether a table of contents should be generated
+
 ## Input Types
 
 A few pieces to describe what input each value expects.

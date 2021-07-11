@@ -26,6 +26,10 @@ function getRunnerPath(file) {
 	return file;
 }
 
+function booleanTransformer(bool) {
+	return bool === 'true';
+}
+
 
 // GitHub Action inputs that are needed for this program to run
 const InputDir = getRunnerInput('input_dir', '', getRunnerPath);
@@ -36,7 +40,7 @@ const ImageDir = getRunnerInput('images_dir', InputDir + '/' + md2pdf.nullCoales
 const OutputDir = getRunnerInput('output_dir', 'built', getRunnerPath);
 
 // Whether to also output a <filename>.html file, there is a bit of magic at the end to ensure that the value is a boolean
-const build_html = getRunnerInput('build_html', true, value => value === 'true');
+const build_html = getRunnerInput('build_html', true, booleanTransformer);
 
 // Custom CSS and HTML files for theming
 const ThemeFile = getRunnerInput('theme', null, getRunnerPath);
@@ -44,7 +48,10 @@ const HighlightThemeFile = getRunnerInput('highlight_theme', DEFAULT_HIGHLIGHT_F
 const TemplateFile = getRunnerInput('template', DEFAULT_TEMPLATE_FILE, getRunnerPath);
 
 // Whether to extend your custom CSS file with the default theme
-const extend_default_theme = getRunnerInput('extend_default_theme', false, value => value === 'true');
+const extend_default_theme = getRunnerInput('extend_default_theme', false, booleanTransformer);
+
+// Table Of Contents settings
+const table_of_contents = getRunnerInput('table_of_contents', false, booleanTransformer);
 
 
 // CreateOutputDirectory creates the output directory if it doesn't exist

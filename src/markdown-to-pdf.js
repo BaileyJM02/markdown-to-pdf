@@ -7,6 +7,7 @@ const hljs = require('highlight.js');
 const express = require('express');
 const mustache = require('mustache');
 const puppeteer = require('puppeteer');
+const cheerio = require('cheerio');
 const request = require('request').defaults({encoding: null}); // Encoding is "null" so we can get the image correctly
 const MarkdownIt = require('markdown-it');
 const MarkdownItAnchor = require('markdown-it-anchor');
@@ -42,10 +43,15 @@ function GetMarkdownIt() {
 	});
 	
 	md.use(MarkdownItAnchor, {
-		permalink: MarkdownItAnchor.permalink.headerLink(),
+		permalink: MarkdownItAnchor.permalink.ariaHidden({
+			class: 'anchor',
+			symbol: '<span class="octicon octicon-link"></span>',
+			placement: 'before',
+		}),
 		slugify: slugify,
 	});
 	md.use(markdownItTOC, {
+		containerId: 'table-of-contents',
 		listType: 'ul',
 		slugify: slugify,
 	});
@@ -104,19 +110,16 @@ const PDFLayout = {
 	margin: {top: 50, bottom: 50, right: 50, left: 50}
 };
 
-class MarkdownToPdf {
-	_image_import;
-	_image_dir;
-	_style;
-	_template;
+class MarkdownToPDF {
 	
 	constructor(options) {
 		this._image_import = options.image_import;
 		this._image_dir = nullCoalescing(options.image_dir, this._image_import);
 		
 		this._style = options.style;
-		
 		this._template = options.template;
+		
+		this._table_of_contents = options.table_of_contents;
 	}
 	
 	start() {
@@ -166,12 +169,21 @@ class MarkdownToPdf {
 	
 	// This converts the markdown string to it's HTML values # => h1 etc.
 	_convertToHtml(text, title) {
+		if(this._table_of_contents) text = '[toc]\n' + text;
+		
 		let md = GetMarkdownIt();
 		let body = md.render(text);
+		let doc = cheerio.load(body);
+		let toc = doc('nav#table-of-contents').html();
+		
+		doc('nav#table-of-contents').remove();
+		body = doc('body').html();
+		
 		let view = {
 			title: title,
 			style: this._style,
-			content: body
+			toc: toc,
+			content: body,
 		};
 		
 		// Compile the template
@@ -231,4 +243,4 @@ class Result {
 	}
 }
 
-exports = module.exports = MarkdownToPdf;
+exports = module.exports = MarkdownToPDF;

@@ -33,6 +33,9 @@ inputs:
   template:
     description: '(File) The location of the HTML/Mustache file you want to use as the HTML template'
     required: false
+  table_of_contents:
+    description: '(Boolean) Whether a table of contents should be generated'
+    required: false
 
 branding:
   icon: 'book'
