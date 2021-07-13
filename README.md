@@ -1,4 +1,6 @@
 # Markdown to PDF
+[![CI](https://github.com/TwoHorus/markdown-to-pdf/actions/workflows/main.yml/badge.svg)](https://github.com/TwoHorus/markdown-to-pdf/actions/workflows/main.yml)
+This is a Hotfix!
 
 [![CI](https://github.com/TwoHorus/markdown-to-pdf/actions/workflows/main.yml/badge.svg)](https://github.com/TwoHorus/markdown-to-pdf/actions/workflows/main.yml)
 This is a Hotfix!
