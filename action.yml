@@ -3,7 +3,7 @@ name: 'Markdown to PDF and HTML'
 description: 'Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.'
 runs:
   using: 'docker'
-  image: 'docker://baileyjm02/markdown-to-pdf:latest'
+  image: 'docker://twohorus/markdown-to-pdf:latest'
 
 inputs:
   input_dir:
@@ -32,6 +32,9 @@ inputs:
     required: false
   template:
     description: '(File) The location of the HTML/Mustache file you want to use as the HTML template'
+    required: false
+  table_of_contents:
+    description: '(Boolean) Whether a table of contents should be generated'
     required: false
 
 branding:
