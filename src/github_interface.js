@@ -26,18 +26,24 @@ function getRunnerPath(file) {
 	return file;
 }
 
+function getRunnerDir(file) {
+	if(file[-1] !== '/') file += '/';
+	
+	return getRunnerPath(file);
+}
+
 function booleanTransformer(bool) {
 	return bool === 'true';
 }
 
 
 // GitHub Action inputs that are needed for this program to run
-const InputDir = getRunnerInput('input_dir', '', getRunnerPath);
+const InputDir = getRunnerInput('input_dir', '', getRunnerDir);
 const ImageImport = getRunnerInput('image_import', null);
-const ImageDir = getRunnerInput('images_dir', InputDir + '/' + md2pdf.nullCoalescing(ImageImport, ''), getRunnerPath);
+const ImageDir = getRunnerInput('images_dir', InputDir + md2pdf.nullCoalescing(ImageImport, ''), getRunnerDir);
 
 // Optional input, though recommended
-const OutputDir = getRunnerInput('output_dir', 'built', getRunnerPath);
+const OutputDir = getRunnerInput('output_dir', 'built/', getRunnerDir);
 
 // Whether to also output a <filename>.html file, there is a bit of magic at the end to ensure that the value is a boolean
 const build_html = getRunnerInput('build_html', true, booleanTransformer);

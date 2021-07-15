@@ -1,4 +1,5 @@
 # Markdown to PDF
+
 [![CI](https://github.com/BaileyJM02/markdown-to-pdf/actions/workflows/main.yml/badge.svg)](https://github.com/BaileyJM02/markdown-to-pdf/actions/workflows/main.yml)
 
 Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.
@@ -53,8 +54,8 @@ with:
 
 ([String](#string))
 The path you use to import your images that can be replaced with the server URL. For example if you
-had `<img src="./images/something-else/file.">` you would pass `./images` as this is replaced
-by `https://localhost:3000` during the build process.
+had `<img src="./images/something-else/file.png">` or `![](./images/something-else/file.png)` you would pass `./images`
+as this is replaced by `https://localhost:3000` during the build process.
 
 ### Build HTML
 
@@ -64,7 +65,7 @@ with:
 ```
 
 ([Boolean](#boolean))
-Whether to also create a .html file.
+Whether to also create an HTML file.
 
 ### CSS Theme
 
@@ -82,7 +83,7 @@ with:
 ```
 
 ([Boolean](#boolean))
-Whether to extend your custom CSS file with the default theme
+Whether to extend your custom CSS file with the default theme.
 
 ### Highlight CSS Theme
 
@@ -112,7 +113,7 @@ with:
 ```
 
 ([Boolean](#boolean))
-Whether a table of contents should be generated
+Whether a table of contents should be generated.
 
 ## Input Types
 
