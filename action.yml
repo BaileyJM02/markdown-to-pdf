@@ -6,9 +6,12 @@ runs:
   image: 'docker://twohorus/markdown-to-pdf:latest'
 
 inputs:
+  input_path:
+    description: '(Path) or (File) The location of the folder containing your .md or .markdown files, or a path to a single .md or .markdown file that you would like to convert.'
+    required: false
   input_dir:
     description: '(Path) The location of the folder containing your .md or .markdown files'
-    required: true
+    required: false
   images_dir:
     description: '(Path) The location of the folder containing your images, this should be the route of all images'
     required: false
