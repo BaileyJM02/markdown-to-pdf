@@ -30,11 +30,25 @@ function booleanTransformer(bool) {
 	return bool === 'true';
 }
 
+// Process given input_path and set flag indicating if it is a directory or single file path
+// getRunnerInput for input_dir is passed as the fallback value for backwards compatibility
+const InputPath = getRunnerInput(
+    'input_path',
+    getRunnerInput('input_dir', '', getRunnerPath),
+    getRunnerPath
+);
+try {
+    const InputPathIsDir = fs.lstatSync(InputPath).isDirectory();
+} catch {
+    throw `Given input path, ${InputPath}, was not found in filesystem!`;
+}
 
-// GitHub Action inputs that are needed for this program to run
-const InputDir = getRunnerInput('input_dir', '', getRunnerPath);
+// Other GitHub Action inputs that are needed for this program to run
 const ImageImport = getRunnerInput('image_import', null);
-const ImageDir = getRunnerInput('images_dir', InputDir + '/' + md2pdf.nullCoalescing(ImageImport, ''), getRunnerPath);
+const ImageDir = getRunnerInput('images_dir',
+	InputPathIsDir ? InputPath : path.dirname(InputPath) + '/' +
+	md2pdf.nullCoalescing(ImageImport, ''),
+	getRunnerPath);
 
 // Optional input, though recommended
 const OutputDir = getRunnerInput('output_dir', 'built', getRunnerPath);
@@ -74,7 +88,9 @@ function GetMarkdownFiles(files) {
 
 // GetFileBody retrieves the file content as a string
 function GetFileBody(file) {
-	return md2pdf.getFileContent(InputDir + file);
+	return md2pdf.getFileContent(
+		InputPathIsDir ? InputPath : path.dirname(InputPath) + file
+	);
 }
 
 // UpdateFileName is a helper function to replace the extension
@@ -107,6 +123,25 @@ function BuildPDF(result, file) {
 	console.log();
 }
 
+async function ConvertMarkdown(file) {
+    // Get the content of the MD file and convert it
+    try {
+        let result = await md.convert(
+            GetFileBody(file),
+            UpdateFileName(file, null)
+        );
+    } catch (error) {
+        throw ` Trouble converting markdown files: ${error}`;
+    }
+
+    // If the `build_html` environment variable is true, build the HTML
+    if (build_html === true) {
+        BuildHTML(result, file);
+    }
+
+    // Build the PDF file
+    BuildPDF(result, file);
+}
 
 // Assign the style and template files to strings for later manipulation
 const style = (extend_default_theme ? md2pdf.getFileContent(DEFAULT_THEME_FILE) : '')
@@ -124,29 +159,47 @@ let md = new md2pdf({
 	table_of_contents: table_of_contents,
 });
 md.start();
-fs.readdir(InputDir, async function(err, files) {
-	// Check output folder exists and fetch file array
-	CreateOutputDirectory(OutputDir);
-	
-	files = GetMarkdownFiles(files);
-	if(files.length === 0) throw 'No markdown files found! Exiting.';
-	
-	console.log('Markdown files found: ' + files.join(', '));
-	
-	// Loop through each file converting it
-	for(let file of files) {
-		// Get the content of the MD file and convert it
-		let result = await md.convert(GetFileBody(file), UpdateFileName(file, null));
-		
-		// If the `build_html` environment variable is true, build the HTML
-		if(build_html === true) {
-			BuildHTML(result, file);
-		}
-		
-		// Build the PDF file
-		BuildPDF(result, file);
-	}
-	
-	// Close the image server
-	md.close();
-});
+
+if (InputPathIsDir) {
+    // Handle case that user supplied path to directory of markdown files
+
+    fs.readdir(InputPath, async function (err, files) {
+        // Check output folder exists and fetch file array
+        CreateOutputDirectory(OutputDir);
+
+        files = GetMarkdownFiles(files);
+        if (files.length === 0) throw 'No markdown files found! Exiting.';
+
+        console.log('Markdown files found: ' + files.join(', '));
+
+        // Loop through each file converting it
+        for (let file of files) {
+            await ConvertMarkdown(file);
+        }
+
+        // Close the image server
+        md.close();
+    });
+} else {
+    // Handle case that user supplied path to one markdown file
+
+    // This is wrapped in an anonymous function to allow async/await.
+    // This could be abstracted into a standalone function easily in the future
+    // but it is currently single-use so this seemed appropriate.
+    (async () => {
+        // Check output folder exists and fetch file array
+        CreateOutputDirectory(OutputDir);
+
+        let files = [path.basename(inputPath)];
+        files = GetMarkdownFiles(files);
+        if (files.length === 0) throw 'No markdown file found! Exiting.';
+
+        console.log('Markdown file found: ' + files[0]);
+
+        // Convert the file
+        await ConvertMarkdown(file);
+
+        // Close the image server
+        md.close();
+    })();
+}
