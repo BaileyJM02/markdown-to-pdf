@@ -69,6 +69,10 @@ if (!OutputDirIsDir) {
 // Whether to also output a <filename>.html file, there is a bit of magic at the end to ensure that the value is a boolean
 const build_html = getRunnerInput('build_html', true, booleanTransformer);
 
+// Whether to also output a <filename>.pdf file, there is a bit of magic at the end to ensure that the value is a boolean
+// This was requested in #36. No idea why...
+const build_pdf = getRunnerInput('build_pdf', true, booleanTransformer);
+
 // Custom CSS and HTML files for theming
 const ThemeFile = getRunnerInput('theme', null, getRunnerPath);
 const HighlightThemeFile = getRunnerInput('highlight_theme', DEFAULT_HIGHLIGHT_FILE, getRunnerPath);
@@ -148,7 +152,9 @@ async function ConvertMarkdown(file) {
     }
 
     // Build the PDF file
-    BuildPDF(result, file);
+    if (build_pdf === true) {
+        BuildPDF(result, file);
+    }
 }
 
 // Assign the style and template files to strings for later manipulation
