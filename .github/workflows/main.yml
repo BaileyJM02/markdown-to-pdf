@@ -46,21 +46,3 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build the docker image with latest tag for dockerhub
-        run: |
-          echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin		
-          docker-compose -f docker-compose-dockerhub.yaml build
-        if: github.ref == 'refs/heads/master'
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: branch Push Docker image to dockerhub registry with latest tag
-        run: |
-          echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin		
-          docker-compose -f docker-compose-dockerhub.yaml push
-        if: github.ref == 'refs/heads/master'
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
