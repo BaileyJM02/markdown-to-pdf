@@ -26,8 +26,9 @@ function getFileContent(file, encoding = 'utf-8') {
 function GetMarkdownIt() {
 	let md = new MarkdownIt({
 		html: true,
-		breaks: true,
+		breaks: false,
 		xhtmlOut: true,
+		style: 'github',
 		// Handle code snippet highlighting, we can catch this error as it will
 		// be correctly handled by markdown-it
 		highlight: function(str, lang) {
@@ -137,25 +138,51 @@ class MarkdownToPDF {
 		
 		// Convert MD to HTML
 		let preHTML = this._convertToHtml(data, nullCoalescing(title, ''));
-		let html = await this._convertImageRoutes(preHTML);
+		let html = await this._convertImageRoutes(preHTML).then(function (html) {
+			return html;
+		}).catch(function (err) {
+			throw `Error while converting images: ${err}`;
+		})
 		
 		// Build the PDF file
 		const browser = await puppeteer.launch({
 			args: [
 				'--headless',
 				'--no-sandbox',
-				'--disable-setuid-sandbox'
+				'--disable-gpu',
+				'--disable-setuid-sandbox',
+				'--disable-dev-shm-usage',
+				'--single-process'
 			]
-		});
-		
-		const page = await browser.newPage();
-		await page.goto('data:text/html;,<h1>Not Rendered</h1>', {waitUntil: 'domcontentloaded', timeout: 2000});
-		await page.setContent(html);
-		
-		let pdf = await page.pdf(PDFLayout);
-		
-		await browser.close();
-		
+		}).then(function (browser) {
+			return browser;
+		}).catch(function (err) {
+			throw `Error while launching puppeteer: ${err}`;
+		})
+
+		const page = await browser.newPage().then(function (page) {
+			return page;
+		}).catch(function (err) {
+			throw `Error while creating new page: ${err}`;
+		})
+
+		await page.goto('data:text/html;,<h1>Not Rendered</h1>', {waitUntil: 'domcontentloaded', timeout: 2000}).catch(function (err) {
+			throw `Error while rendering page: ${err}`;
+		})
+		await page.setContent(html).catch(function (err) {
+			throw `Error while rendering page: ${err}`;
+		})
+
+		let pdf = await page.pdf(PDFLayout).then(function (pdf) {
+			return pdf;
+		}).catch(function (err) {
+			throw `Error while rendering page: ${err}`;
+		})
+
+		await browser.close().catch(function (err) {
+			throw `Error while rendering page: ${err}`;
+		})
+
 		return new Result(html, pdf);
 	}
 	
@@ -207,7 +234,11 @@ class MarkdownToPDF {
 		while(m = imgTagRegex.exec(html)) {
 			try {
 				let path = m[1].replace(imagePathRegex, 'http://localhost:3000');
-				let image = await encodeImage(path);
+				let image = await encodeImage(path).then(function (image) {
+					return image;
+				}).catch(function (err) {
+					throw `Error while converting image: ${err}`;
+				})
 				
 				if(image !== null) {
 					encoded = encoded.replace(m[1], image);

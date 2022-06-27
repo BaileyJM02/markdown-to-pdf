@@ -12,16 +12,18 @@ Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.
 
 ## GitHub Action Inputs
 
-### Input Directory
+### Input Path
 
 ```yaml
 with:
-  input_dir: value
+  input_path: value
 ```
 
 (**Required**)
-([Path](#path))
-The location of the folder containing your .md or .markdown files.
+([Path](#path)) or ([File](#file))
+The location of the folder containing your .md or .markdown files, or a path to a single .md or .markdown file that you would like to convert.
+
+*Note, previous versions of this action accepted the `input_dir` input. This is still accepted as input for backwards compatibility, but passing a directory as `input_path` now carries out the same functionality.
 
 ### Images Directory
 
