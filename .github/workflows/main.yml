@@ -8,19 +8,21 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v1
+      
       - name: Build the docker image
         run: |
           export TAG=${GITHUB_SHA:0:8}
-          echo "$DOCKER_PASSWORD" | docker login docker.pkg.github.com -u "$DOCKER_USERNAME" --password-stdin
+          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml build
         if: github.ref == 'refs/heads/master' || contains(github.ref,'bdc_')
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
       - name: branch Push Docker image to github package registry
         run: |
           export TAG=${GITHUB_SHA:0:8}
-          echo "$DOCKER_PASSWORD" | docker login docker.pkg.github.com -u "$DOCKER_USERNAME" --password-stdin
+          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml push
         if: github.ref == 'refs/heads/master' || contains(github.ref,'bdc_')
         env:
@@ -29,7 +31,7 @@ jobs:
 
       - name: Build the docker image with latest tag
         run: |
-          echo "$DOCKER_PASSWORD" | docker login docker.pkg.github.com -u "$DOCKER_USERNAME" --password-stdin
+          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml build
         if: github.ref == 'refs/heads/master'
         env:
@@ -38,12 +40,13 @@ jobs:
 
       - name: branch Push Docker image to github package registry with latest tag
         run: |
-          echo "$DOCKER_PASSWORD" | docker login docker.pkg.github.com -u "$DOCKER_USERNAME" --password-stdin
+          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml push
         if: github.ref == 'refs/heads/master'
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build the docker image with latest tag for dockerhub
         run: |
           echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin		
@@ -52,6 +55,7 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+
       - name: branch Push Docker image to dockerhub registry with latest tag
         run: |
           echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin		
