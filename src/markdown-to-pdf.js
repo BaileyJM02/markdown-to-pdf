@@ -9,10 +9,10 @@ const mustache = require('mustache');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const request = require('request').defaults({encoding: null}); // Encoding is "null" so we can get the image correctly
-const MarkdownIt = require('markdown-it');
-const MarkdownItAnchor = require('markdown-it-anchor');
+const markdownIt = require('markdown-it');
+const markdownItAnchor = require('markdown-it-anchor');
 const markdownItTOC = require('markdown-it-toc-done-right');
-
+const markdownItEmoji = require('markdown-it-emoji');
 
 function nullCoalescing(value, fallback) {
 	return value !== undefined && value !== null ? value : fallback;
@@ -24,7 +24,7 @@ function getFileContent(file, encoding = 'utf-8') {
 
 // GetMarkdownIt returns the instance of markdown-it with the correct settings
 function GetMarkdownIt() {
-	let md = new MarkdownIt({
+	let md = new markdownIt({
 		html: true,
 		breaks: false,
 		xhtmlOut: true,
@@ -43,8 +43,8 @@ function GetMarkdownIt() {
 		}
 	});
 	
-	md.use(MarkdownItAnchor, {
-		permalink: MarkdownItAnchor.permalink.ariaHidden({
+	md.use(markdownItAnchor, {
+		permalink: markdownItAnchor.permalink.ariaHidden({
 			class: 'anchor',
 			symbol: '<span class="octicon octicon-link"></span>',
 			placement: 'before',
@@ -56,6 +56,7 @@ function GetMarkdownIt() {
 		listType: 'ul',
 		slugify: slugify,
 	});
+	md.use(markdownItEmoji);
 	
 	return md;
 }
