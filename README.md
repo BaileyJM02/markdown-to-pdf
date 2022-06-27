@@ -68,6 +68,16 @@ with:
 ([Boolean](#boolean))
 Whether to also create a .html file.
 
+### Build PDF
+
+```yaml
+with:
+  build_pdf: value
+```
+
+([Boolean](#boolean))
+Whether to also create a .pdf file (defaults to `true`. After all, this is the intended behaviour).
+
 ### CSS Theme
 
 ```yaml

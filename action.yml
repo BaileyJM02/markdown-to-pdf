@@ -24,6 +24,9 @@ inputs:
   build_html:
     description: '(Boolean) Whether to also create a .html file'
     required: false
+  build_pdf:
+    description: '(Boolean) Whether to create a .pdf file (the intended behaviour)'
+    required: false
   theme:
     description: '(File) The location of the CSS file you want to use as the theme'
     required: false
