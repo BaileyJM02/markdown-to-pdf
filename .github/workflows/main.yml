@@ -1,4 +1,8 @@
-on: [push, workflow_dispatch]
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - v*
 
 name: CI
 
@@ -8,23 +12,23 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v1
-      
+
       - name: Build the docker image
         run: |
-          export TAG=${GITHUB_SHA:0:8}
+          export TAG=${{ github.ref_name }}
           echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml build
-        if: github.ref == 'refs/heads/master' || contains(github.ref,'bdc_')
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
       - name: branch Push Docker image to github package registry
         run: |
-          export TAG=${GITHUB_SHA:0:8}
+          export TAG=${{ github.ref_name }}
           echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml push
-        if: github.ref == 'refs/heads/master' || contains(github.ref,'bdc_')
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
