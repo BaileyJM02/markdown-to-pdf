@@ -61,7 +61,7 @@ let OutputDirIsDir = false
 try {
     OutputDirIsDir = fs.lstatSync(OutputDir).isDirectory();
 } catch { }
-if (!OutputDirIsDir) {
+if (OutputDirIsDir) {
     OutputDir += OutputDir.endsWith("/") ? "" : "/"
     CreateOutputDirectory(OutputDir);
 }
