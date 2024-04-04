@@ -15,7 +15,7 @@ jobs:
           input_path: README.md
           output_dir: generated
           build_html: false
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: readme
           path: generated
