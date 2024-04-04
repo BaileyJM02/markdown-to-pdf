@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: docker build . -t markdown-to-pdf-from-ubuntu-latest
+      - run: docker build .
   test-usage:
     runs-on: ubuntu-latest
     steps:
