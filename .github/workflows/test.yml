@@ -10,3 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build . -t markdown-to-pdf-from-ubuntu-latest
+      - uses: ./
+        with:
+          input_path: README.md
+          output_dir: generated
+          build_html: false
+      - uses: actions/upload-artifact@v3
+        with:
+          name: readme
+          path: generated
