@@ -5,11 +5,15 @@ on:
   pull_request:
   
 jobs:
-  test:
+  test-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: docker build . -t markdown-to-pdf-from-ubuntu-latest
+  test-usage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: ./
         with:
           input_path: README.md
