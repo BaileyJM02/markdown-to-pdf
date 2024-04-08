@@ -1,0 +1,25 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build .
+  test-usage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          input_path: README.md
+          output_dir: generated
+          build_html: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: readme
+          path: generated
